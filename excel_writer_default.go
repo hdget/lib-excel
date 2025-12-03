@@ -3,13 +3,14 @@ package excel
 import (
 	"bytes"
 	"fmt"
+	"reflect"
+
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
-	"reflect"
 )
 
-type excelWriterImpl struct {
+type writerImpl struct {
 	*excelize.File
 	option     *excelWriterOption
 	colStyle   int            // 列样式
@@ -20,14 +21,14 @@ const (
 	allColAxis = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
-func NewWriter(options ...WriterOption) (ExcelWriter, error) {
+func NewWriter(options ...WriterOption) (Writer, error) {
 	var option excelWriterOption
 	err := copier.Copy(&option, defaultExcelWriterOption)
 	if err != nil {
 		return nil, err
 	}
 
-	writer := &excelWriterImpl{
+	writer := &writerImpl{
 		File:       excelize.NewFile(),
 		option:     &option,
 		cellStyles: make(map[string]int),
@@ -45,11 +46,11 @@ func NewWriter(options ...WriterOption) (ExcelWriter, error) {
 	return writer, nil
 }
 
-func (w *excelWriterImpl) CreateDefaultSheet(rows []any) error {
+func (w *writerImpl) CreateDefaultSheet(rows []any) error {
 	return w.CreateSheet(w.option.defaultSheetName, rows)
 }
 
-func (w *excelWriterImpl) CreateSheet(sheetName string, rows []any) error {
+func (w *writerImpl) CreateSheet(sheetName string, rows []any) error {
 	// new sheet
 	sheet, err := w.NewSheet(sheetName)
 	if err != nil {
@@ -109,12 +110,7 @@ func (w *excelWriterImpl) CreateSheet(sheetName string, rows []any) error {
 	return nil
 }
 
-// Save do nothing
-func (w *excelWriterImpl) Save(filename string) error {
-	return nil
-}
-
-func (w *excelWriterImpl) GetContent() ([]byte, error) {
+func (w *writerImpl) GetContent() ([]byte, error) {
 	// 获取文件写入buffer
 	buf, err := w.WriteToBuffer()
 	if err != nil {
@@ -124,7 +120,7 @@ func (w *excelWriterImpl) GetContent() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (w *excelWriterImpl) getRowType(rows []any) (reflect.Type, error) {
+func (w *writerImpl) getRowType(rows []any) (reflect.Type, error) {
 	// 通过反射获取表格的标题属性, 生成表格表头
 	if len(rows) == 0 {
 		return nil, fmt.Errorf("empty rows")
@@ -143,7 +139,7 @@ func (w *excelWriterImpl) getRowType(rows []any) (reflect.Type, error) {
 	return firstRowType, nil
 }
 
-func (w *excelWriterImpl) genColAxis(index int) string {
+func (w *writerImpl) genColAxis(index int) string {
 	mod := index % 26
 	s := allColAxis[mod : mod+1]
 	var buf bytes.Buffer

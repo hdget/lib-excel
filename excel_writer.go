@@ -2,12 +2,10 @@ package excel
 
 import "github.com/xuri/excelize/v2"
 
-type ExcelWriter interface {
-	CreateDefaultSheet(rows []any) error
-	CreateSheet(sheetName string, rows []any) error
-	Close() error
-	GetContent() ([]byte, error)
-	Save(filename string) error
+type Writer interface {
+	CreateDefaultSheet(rows []any) error            // create a default sheet
+	CreateSheet(sheetName string, rows []any) error // create sheet with specified name
+	GetContent() ([]byte, error)                    // get excel content
 }
 
 type excelWriterOption struct {
