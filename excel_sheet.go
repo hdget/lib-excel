@@ -1,10 +1,11 @@
 package excel
 
 import (
-	"github.com/hdget/utils/convert"
+	"strings"
+
+	"github.com/hdget/utils"
 	"github.com/hdget/utils/text"
 	"github.com/spf13/cast"
-	"strings"
 )
 
 type Sheet struct {
@@ -53,21 +54,21 @@ func (r *SheetRow) GetFloat64(colName string) float64 {
 func (r *SheetRow) GetInt64Slice(colName string) []int64 {
 	v := r.Get(colName)
 	v = strings.ReplaceAll(v, "，", ",")
-	return convert.CsvToInt64s(v)
+	return utils.CsvToNumbers[int64](v)
 }
 
 // GetInt32Slice get comma separated int32 slice
 func (r *SheetRow) GetInt32Slice(colName string) []int32 {
 	v := r.Get(colName)
 	v = strings.ReplaceAll(v, "，", ",")
-	return convert.CsvToInt32s(v)
+	return utils.CsvToNumbers[int32](v)
 }
 
 // GetIntSlice get comma separated int slice
 func (r *SheetRow) GetIntSlice(colName string) []int {
 	v := r.Get(colName)
 	v = strings.ReplaceAll(v, "，", ",")
-	return convert.CsvToInts(v)
+	return utils.CsvToNumbers[int](v)
 }
 
 // GetStringSlice get comma separated string slice
